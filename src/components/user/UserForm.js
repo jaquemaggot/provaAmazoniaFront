@@ -13,21 +13,19 @@ function UserForm({ handleSubmit, btnText, userData }) {
         handleSubmit(user)
     }
 
-    function handleChange(e){
-        setUser({...user, [e.target.name]: e.target.value})
-    }
+    function handleChange(e) {
+        const { name, value } = e.target
 
-    function handleCategory(e){
-        setUser({...user, category:{
-            id: e.target.value,
-            name: e.target.options[e.target.selectedIndex].text,
-        },
-    })
+        if (name === "cpf" || name === "zip_code") {
+            const numericValue = value.replace(/\D/g, "") 
+            setUser({ ...user, [name]: numericValue })
+        } else {
+            setUser({ ...user, [name]: value })
+        }
     }
 
     return (
         <form onSubmit={submit} className={styles.form}>
-        
             <Input
                 type="text"
                 text="Nome"
@@ -64,7 +62,7 @@ function UserForm({ handleSubmit, btnText, userData }) {
                 type="text"
                 text="Cep"
                 name="zip_code"
-                placeholder="Insira a data de nascimento:"
+                placeholder="Insira o CEP:"
                 handleOnChange={handleChange}
                 value={user.zip_code ? user.zip_code : ''}
             />
