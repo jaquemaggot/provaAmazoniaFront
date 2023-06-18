@@ -19,6 +19,7 @@ function Users() {
     const [users, setUsers] = useState([])
     const [removeLoading, setRemoveLoading] = useState(false)
     const [userMessage, setUserMessage] = useState('')
+    const [type, setType] = useState()
 
     const location = useLocation()
     let message = ''
@@ -27,34 +28,53 @@ function Users() {
     }
 
     useEffect(() => {
-        setTimeout(() => {
-            fetch('http://127.0.0.1:8000/api/users', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+        fetch('http://127.0.0.1:8000/api/users', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(resp => resp.json())
+            .then(data => {
+                setUsers(data)
             })
-                .then(resp => resp.json())
-                .then(data => {
-                    setUsers(data)
-                    setRemoveLoading(true)
-                })
-                .catch(err => console.log(err))
-        }, 300)
+            .catch(err => console.log(err))
+            .finally(() => {
+                setRemoveLoading(true);
+            })
     }, [])
 
     function removeUser(id) {
         fetch(`http://127.0.0.1:8000/api/user/${id}`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
         })
-            .then((resp) => resp.json())
+            .then((resp) => {
+                if (resp.ok) {
+                    return resp.json();
+                } else {
+                    throw resp;
+                }
+            })
             .then(() => {
-                setUsers(users.filter((user) => user.id !== id))
-                setUserMessage('Usuário removido com sucesso!')
-            }).catch((err) => { setUserMessage(err) })
+                setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
+                setUserMessage('Usuário removido com sucesso!');
+            })
+            .catch((err) => {
+                if (err.text) {
+                    err.text().then((errorData) => {
+                        const errorMessage = errorData || 'Erro desconhecido';
+                        setUserMessage(errorMessage);
+                        setType('error');
+                    });
+                } else {
+                    const errorMessage = err.statusText || 'Erro desconhecido';
+                    setUserMessage(errorMessage);
+                    setType('error');
+                }
+            });
     }
 
     return (

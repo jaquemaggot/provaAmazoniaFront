@@ -49,7 +49,7 @@ function User() {
             .then((data) => {
                 setUser(data);
                 setShowUserForm(false);
-                setMessage('Projeto atualizado');
+                setMessage('Usuário atualizado');
                 setType('success');
             })
             .catch((err) => {
